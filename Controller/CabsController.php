@@ -24,13 +24,13 @@ class CabsController {
         }
     }
 
-    public function bookCab($source, $destination, $state, $bookingsControllerObject, $bookingDate=null) {
-        if(is_null($bookingDate)){
+    public function bookCab($source, $destination, $state, $bookingsControllerObject, $bookingDate = null) {
+        if (is_null($bookingDate)) {
             $bookingDate = date('Y-m-d');
         }
-        LogUtil::log('cityWiseRequests', ['requestTime' => date('Y-m-d H:i:s'), 'sourceCity' => $source, 'destinationCity' => $destination, 'state' => $state]);
+        LogUtil::log('cityWiseRequests', ['requestTime' => $bookingDate . ' 00:00:00', 'sourceCity' => $source, 'destinationCity' => $destination, 'state' => $state]);
 //        $idleCabs = $this->getIdleCabsInACity($source, $state);
-        $idleCabs = $this->getIdleCabsInACityForADay($source, $state, $bookingDate,$bookingsControllerObject);
+        $idleCabs = $this->getIdleCabsInACityForADay($source, $state, $bookingDate, $bookingsControllerObject);
         if (empty($idleCabs)) {
             return array('status' => 'falure', 'message' => 'No cabs available at the moment!');
         }
@@ -40,7 +40,8 @@ class CabsController {
         $firstKey = key($idleCabTimes);
         $bookingID = uniqid();
 
-        $this->cabService->cabs[$firstKey]->setStatus('in_trip');
+        $status = ($bookingDate == date('Y-m-d') ? 'in_trip' : 'future');
+        $this->cabService->cabs[$firstKey]->setStatus($status);
         $booking = $bookingsControllerObject->addBooking($bookingID, $this->cabService->cabs[$firstKey], $source, $destination, $state, $state, 'trip_in_progress', date('Y-m-d H:i:s'));
 
         return array('status' => 'success', 'bookingInfo' => $booking);
@@ -68,7 +69,7 @@ class CabsController {
                 $cab->getLocationObj()->getCity() == $sourceCity &&
                 $cab->getLocationObj()->getState() == $state &&
                 $cab->getstatus() == 'idle' &&
-                $bookingsControllerObject->isBookingExists($id,$date)
+                $bookingsControllerObject->isBookingExists($id, $date)
             ) {
                 $ids[] = $id;
             }
