@@ -56,8 +56,8 @@ $cabsControllerObject->listAllCabs();
 echo '********************************************************' . PHP_EOL;
 
 
-echo 'Book a cab between Mumbai - Pune(booking1)' . PHP_EOL;
-$info = $cabsControllerObject->bookCab('mumbai', 'pune', 'mh', $bookingsControllerObject);
+echo 'Book a cab between Mumbai - Pune(booking1) for 19th Feb 2021' . PHP_EOL;
+$info = $cabsControllerObject->bookCab('mumbai', 'pune', 'mh', $bookingsControllerObject, '19/02/2021');
 if ($info['status'] == 'success') {
     $booking1 = $info['bookingInfo'];
     echo 'Cab booked between Mumbai - Pune(booking1) - Booking ID: ' . $booking1->getId() . ', Cab No: ' . $booking1->getCabObj()->getId() . PHP_EOL;

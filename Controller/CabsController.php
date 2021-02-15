@@ -24,9 +24,13 @@ class CabsController {
         }
     }
 
-    public function bookCab($source, $destination, $state, $bookingsControllerObject) {
+    public function bookCab($source, $destination, $state, $bookingsControllerObject, $bookingDate=null) {
+        if(is_null($bookingDate)){
+            $bookingDate = date('Y-m-d');
+        }
         LogUtil::log('cityWiseRequests', ['requestTime' => date('Y-m-d H:i:s'), 'sourceCity' => $source, 'destinationCity' => $destination, 'state' => $state]);
-        $idleCabs = $this->getIdleCabsInACity($source, $state);
+//        $idleCabs = $this->getIdleCabsInACity($source, $state);
+        $idleCabs = $this->getIdleCabsInACityForADay($source, $state, $bookingDate,$bookingsControllerObject);
         if (empty($idleCabs)) {
             return array('status' => 'falure', 'message' => 'No cabs available at the moment!');
         }
@@ -49,6 +53,22 @@ class CabsController {
                 $cab->getLocationObj()->getCity() == $sourceCity &&
                 $cab->getLocationObj()->getState() == $state &&
                 $cab->getstatus() == 'idle'
+            ) {
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
+    private function getIdleCabsInACityForADay($sourceCity, $state, $date, $bookingsControllerObject) {
+        $ids = [];
+        foreach ($this->cabService->cabs as $id => $cab) {
+            if (
+                $cab->getLocationObj()->getCity() == $sourceCity &&
+                $cab->getLocationObj()->getState() == $state &&
+                $cab->getstatus() == 'idle' &&
+                $bookingsControllerObject->isBookingExists($id,$date)
             ) {
                 $ids[] = $id;
             }

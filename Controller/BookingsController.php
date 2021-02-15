@@ -39,7 +39,7 @@ class BookingsController {
         $this->bookingService->bookings[$cabID][$bookingId]->setEndDateTime(date('Y-m-d H:i:s'));
         $this->bookingService->bookings[$cabID][$bookingId]->getCabObj()->setStatus('idle');
         $this->bookingService->bookings[$cabID][$bookingId]->getCabObj()->setLocationObj($newLocationObj);
-        $cabHistoryObject->addState($bookingInfo->getCabObj(),$newLocationObj->getState());
+        $cabHistoryObject->addState($bookingInfo->getCabObj(), $newLocationObj->getState());
     }
 
     public function getDurationInSeconds($cabId, $startDateTime, $endDateTime) {
@@ -54,5 +54,20 @@ class BookingsController {
         }
 
         return $seconds;
+    }
+
+    public function isBookingExists($cabId, $date) {
+        if (!empty($this->bookingService->bookings[$cabId])) {
+            foreach ($this->bookingService->bookings[$cabId] as $booking) {
+                $startDate = date('Y-m-d', strtotime($booking->getStartDateTime()));
+                if (
+                    $startDate == $date
+                ) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
